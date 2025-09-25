@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hazrat Multani Baba Gangwar - Professional Photo Gallery</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #0f1724;
+            --card: #0b1220;
+            --muted: #94a3b8;
+            --accent: #06b6d4;
+            --gap: 12px;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: Inter, system-ui, -apple-system, Arial;
+            margin: 0;
+
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            margin: auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin: 0 0 18px;
+            text-align: center;
+        }
+
+        p.lead {
+            color: var(--muted);
+            margin: 6px 0 24px;
+            text-align: center;
+        }
+
+        /* Gallery grid */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--gap);
+        }
+
+        .item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.12));
+            cursor: pointer;
+            transition: transform .25s ease, box-shadow .25s ease;
+        }
+
+        .item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(2, 6, 23, 0.6)
+        }
+
+        .item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            aspect-ratio: 4/3
+        }
+
+        .caption {
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.15), rgba(2, 6, 23, 0.5));
+            backdrop-filter: blur(4px);
+            font-size: 13px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        /* Modal / Lightbox */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+            z-index: 1000
+        }
+
+        .lightbox.open {
+            display: flex
+        }
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.6), rgba(2, 6, 23, 0.9));
+            backdrop-filter: blur(6px)
+        }
+
+        .viewer {
+            position: relative;
+            max-width: 1100px;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            z-index: 2
+        }
+
+        .viewer .btn {
+            background: none;
+            border: 0;
+            color: #fff;
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 22px
+        }
+
+        .photo-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .photo {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+            box-shadow: 0 18px 50px rgba(2, 6, 23, 0.7);
+        }
+
+        .meta {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 14px;
+            text-align: center
+        }
+
+        .close {
+            position: absolute;
+            right: 18px;
+            top: 18px;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            border: 0;
+            color: #fff;
+            cursor: pointer
+        }
+
+        .thumbs {
+            display: flex;
+            gap: 8px;
+            overflow: auto;
+            padding: 8px 12px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.08));
+            border-radius: 10px;
+            margin-top: 14px
+        }
+
+        .thumbs img {
+            width: 72px;
+            height: 54px;
+            object-fit: cover;
+            border-radius: 6px;
+            opacity: 0.7;
+            cursor: pointer
+        }
+
+        .thumbs img.active {
+            outline: 3px solid var(--accent);
+            opacity: 1
+        }
+
+        @media (max-width:640px) {
+            .viewer {
+                flex-direction: column
+            }
+
+            .viewer .btn {
+                width: 40px;
+                height: 40px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Banner -->
+    <div id="header"></div>
+
+    <!-- Main Gallery -->
+    <div class="container">
+        <h1 data-key="photo_gallery"></h1>
+        <div class="gallery" id="gallery" aria-label="Photo gallery"></div>
+
+        <!-- Lightbox -->
+        <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+            <div class="overlay" id="overlay"></div>
+            <button class="close" id="closeBtn" aria-label="Close viewer">✕</button>
+            <div class="viewer" role="document">
+                <button class="btn prev" id="prevBtn" aria-label="Previous photo">◀</button>
+                <div class="photo-wrap">
+                    <img src="" alt="" class="photo" id="lightImg">
+                    <div class="meta" id="metaText"></div>
+                    <div class="thumbs" id="thumbs"></div>
+                </div>
+                <button class="btn next" id="nextBtn" aria-label="Next photo">▶</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer"></div>
+
+    <script src="js/script.js"></script>
+    <script src="js/language.js"></script>
+
+    <script>
+        /*Code Load the language*/
+        const savedLang = Language.get();
+        Language.apply(savedLang);
+        const selector = document.getElementById("language");
+        if (selector) {
+            selector.value = savedLang;
+            selector.addEventListener("change", (e) => Language.set(e.target.value));
+        }
+        const images = [
+            { src: "Images/Background/BG.jpg", title: "HMBG" },
+            { src: "Images/Background/img-2.jpg", title: "HMBG" },
+            { src: "Images/Background/img-3.jpg", title: "HMBG" },
+            { src: "Images/Background/BG.jpg", title: "HMBG" },
+            { src: "Images/Background/img-2.jpg", title: "HMBG" },
+            { src: "Images/Background/img-3.jpg", title: "HMBG" },
+            { src: "Images/Background/BG.jpg", title: "HMBG" },
+            { src: "Images/Background/img-2.jpg", title: "HMBG" },
+            { src: "Images/Background/img-3.jpg", title: "HMBG" },
+        ];
+
+        const gallery = document.getElementById('gallery');
+        const lightbox = document.getElementById('lightbox');
+        const lightImg = document.getElementById('lightImg');
+        const metaText = document.getElementById('metaText');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const overlay = document.getElementById('overlay');
+        const thumbs = document.getElementById('thumbs');
+
+        let currentIndex = 0;
+
+        function buildGallery() {
+            images.forEach((img, i) => {
+                const div = document.createElement('button');
+                div.className = 'item';
+                div.setAttribute('aria-label', img.title + ' - Open image');
+                div.innerHTML = `
+          <img src="${img.src}" alt="${img.title}">
+          <div class="caption">${img.title}<span style="font-size:12px;color:var(--muted)">${i + 1}/${images.length}</span></div>
+        `;
+                div.addEventListener('click', () => openViewer(i));
+                gallery.appendChild(div);
+            });
+        }
+
+        function buildThumbs() {
+            thumbs.innerHTML = '';
+            images.forEach((img, i) => {
+                const t = document.createElement('img');
+                t.src = img.src;
+                t.alt = img.title;
+                t.addEventListener('click', () => goto(i));
+                thumbs.appendChild(t);
+            });
+        }
+
+        function openViewer(index) {
+            currentIndex = index;
+            updateViewer();
+            lightbox.classList.add('open');
+            lightbox.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeViewer() {
+            lightbox.classList.remove('open');
+            lightbox.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        function updateViewer() {
+            const img = images[currentIndex];
+            lightImg.src = img.src;
+            lightImg.alt = img.title;
+            metaText.textContent = img.title + ' — ' + (currentIndex + 1) + ' of ' + images.length;
+            Array.from(thumbs.children).forEach((t, i) => {
+                t.classList.toggle('active', i === currentIndex);
+            });
+        }
+
+        function goto(index) {
+            if (index < 0) index = images.length - 1;
+            if (index >= images.length) index = 0;
+            currentIndex = index;
+            updateViewer();
+        }
+
+        prevBtn.addEventListener('click', () => goto(currentIndex - 1));
+        nextBtn.addEventListener('click', () => goto(currentIndex + 1));
+        closeBtn.addEventListener('click', closeViewer);
+        overlay.addEventListener('click', closeViewer);
+
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.classList.contains('open')) {
+                if (e.key === 'ArrowLeft') goto(currentIndex - 1);
+                if (e.key === 'ArrowRight') goto(currentIndex + 1);
+                if (e.key === 'Escape') closeViewer();
+            }
+        });
+
+        buildGallery();
+        buildThumbs();
+    </script>
+</body>
+
+</html>
